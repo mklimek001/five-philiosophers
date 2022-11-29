@@ -1,19 +1,5 @@
-// Teoria Współbieżnośi, implementacja problemu 5 filozofów w node.js
-// Opis problemu: http://en.wikipedia.org/wiki/Dining_philosophers_problem
-//   https://pl.wikipedia.org/wiki/Problem_ucztuj%C4%85cych_filozof%C3%B3w
-// 1. Dokończ implementację funkcji podnoszenia widelca (Fork.acquire).
-// 2. Zaimplementuj "naiwny" algorytm (każdy filozof podnosi najpierw lewy, potem
-//    prawy widelec, itd.).
-// 3. Zaimplementuj rozwiązanie asymetryczne: filozofowie z nieparzystym numerem
-//    najpierw podnoszą widelec lewy, z parzystym -- prawy. 
-// 4. Zaimplementuj rozwiązanie z kelnerem (według polskiej wersji strony)
-// 5. Zaimplementuj rozwiążanie z jednoczesnym podnoszeniem widelców:
-//    filozof albo podnosi jednocześnie oba widelce, albo żadnego.
-// 6. Uruchom eksperymenty dla różnej liczby filozofów i dla każdego wariantu
-//    implementacji zmierz średni czas oczekiwania każdego filozofa na dostęp 
-//    do widelców. Wyniki przedstaw na wykresach.
-
-
+//Five Philosophers problem solution
+//created during classes at AGH UST
 
 function random(range) {
     return Math.floor(Math.random() * range);
@@ -25,11 +11,7 @@ var Fork = function() {
 }
 
 Fork.prototype.acquire = function(cb) { 
-    // zaimplementuj funkcję acquire, tak by korzystala z algorytmu BEB
-    // (http://pl.wikipedia.org/wiki/Binary_Exponential_Backoff), tzn:
-    // 1. przed pierwszą próbą podniesienia widelca Filozof odczekuje 1ms
-    // 2. gdy próba jest nieudana, zwiększa czas oczekiwania dwukrotnie
-    //    i ponawia próbę, itd.
+    //waiting function use simply Exponential Backoff algorithm
 
     var fork = this,
     waiting = function(ms) {
@@ -61,15 +43,13 @@ var Philosopher = function(id, forks) {
 }
 
 
+//naive solution
 Philosopher.prototype.startNaive = function(count) {
     var forks = this.forks,
         f1 = this.f1,
         f2 = this.f2,
         id = this.id;
     
-    // zaimplementuj rozwiązanie naiwne
-    // każdy filozof powinien 'count' razy wykonywać cykl
-    // podnoszenia widelców -- jedzenia -- zwalniania widelców
     this.waitingTime = 0;
     var myself = this;
 
@@ -101,14 +81,13 @@ Philosopher.prototype.startNaive = function(count) {
     loop(count);
 }
 
+
+//asymetric solution
 Philosopher.prototype.startAsym = function(count) {
     var forks = this.forks,
         f1 = this.f1,
         f2 = this.f2,
         id = this.id;
-    // zaimplementuj rozwiązanie asymetryczne
-    // każdy filozof powinien 'count' razy wykonywać cykl
-    // podnoszenia widelców -- jedzenia -- zwalniania widelców
 
     this.waitingTime = 0;
     var myself = this;
@@ -172,6 +151,8 @@ Philosopher.prototype.startAsym = function(count) {
 }
 
 
+// solution with conductor
+
 var Conductor = function(philosophers_num) {
     this.state = 0;
     this.max_val = philosophers_num-1;
@@ -204,17 +185,12 @@ Conductor.prototype.release = function() {
 }
 
 
-
 Philosopher.prototype.startConductor = function(count, conductor) {
     var forks = this.forks,
         f1 = this.f1,
         f2 = this.f2,
         id = this.id;
     
-    // zaimplementuj rozwiązanie z kelnerem
-    // każdy filozof powinien 'count' razy wykonywać cykl
-    // podnoszenia widelców -- jedzenia -- zwalniania widelców
-
     this.waitingTime = 0;
     var myself = this;
 
@@ -253,6 +229,8 @@ Philosopher.prototype.startConductor = function(count, conductor) {
 }
 
 
+// solution with parallel forks taking
+
 const acquireParallel = function(forks, f1, f2, cb) { 
     var waiting = function(ms) {
         setTimeout(()=> {
@@ -283,10 +261,6 @@ Philosopher.prototype.startParallel = function(count) {
         f2 = this.f2,
         id = this.id;
     
-    // TODO: wersja z jednoczesnym podnoszeniem widelców
-    // Algorytm BEB powinien obejmować podnoszenie obu widelców, 
-    // a nie każdego z osobna
-
     this.waitingTime = 0;
     var myself = this;
 
@@ -319,6 +293,7 @@ Philosopher.prototype.startParallel = function(count) {
 }
 
 
+// coide to test it
 
 const rl = require('readline').createInterface({
     input: process.stdin,
@@ -386,28 +361,6 @@ rl.question('Philosophers number: ', (philosophers_num) => {
         console.log("   -----------------------------   ")
     }, meals*N*1000)
 
+	});
 });
-});
 
-
-/*
-var N = 5;
-var meals = 30;
-var forks = [];
-var philosophers = [];
-var conductor = new Conductor(N);
-
-for (var i = 0; i < N; i++) {
-    forks.push(new Fork());
-}
-
-for (var i = 0; i < N; i++) {
-    philosophers.push(new Philosopher(i, forks));
-}
-
-totalTime = 0;
-for (var i = 0; i < N; i++) {
-    philosophers[i].startConductor(meals,conductor);
-}
-
-*/
